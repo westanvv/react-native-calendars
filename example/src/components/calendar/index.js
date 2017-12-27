@@ -1,23 +1,23 @@
-import React, {Component} from 'react';
+import React, { Component } from 'react'
 import {
   View,
-  ViewPropTypes
-} from 'react-native';
-import PropTypes from 'prop-types';
+  ViewPropTypes,
+} from 'react-native'
+import PropTypes from 'prop-types'
 
-import XDate from 'xdate';
-import {xdateToData, parseDate} from '../interface';
-import styleConstructor from './style';
-import * as CONSTANTS from '../constants';
+import XDate from 'xdate'
+import {xdateToData, parseDate} from '../interface'
+import styleConstructor from './style'
+import * as CONSTANTS from '../constants'
 
-import CalendarHeader from './header';
-import Days from './days';
-import Months from './months';
+import CalendarHeader from './header'
+import Days from './days'
+import Months from './months'
 
-import shouldComponentUpdate from './updater';
+import shouldComponentUpdate from './updater'
 
 //Fallback when RN version is < 0.44
-const viewPropTypes = ViewPropTypes || View.propTypes;
+const viewPropTypes = ViewPropTypes || View.propTypes
 
 class Calendar extends Component {
   static propTypes = {
@@ -73,7 +73,7 @@ class Calendar extends Component {
     // Month format in calendar title. Formatting values: http://arshaw.com/xdate/#Formatting
     monthItemFormat: PropTypes.string,
     monthRowItems: PropTypes.number,
-  };
+  }
 
   static defaultProps = {
     // Show week numbers. Default = false
@@ -82,122 +82,129 @@ class Calendar extends Component {
     dataType: CONSTANTS.DATA_TYPES.day,
     monthItemFormat: 'MMMM',
     monthRowItems: 3,
-  };
+  }
 
   constructor(props) {
-    super(props);
+    super(props)
 
-    this.style = styleConstructor(this.props.theme);
-    let currentMonth;
-    if (props.current) {
-      currentMonth = parseDate(props.current);
-    } else {
-      currentMonth = XDate();
-    }
+    this.style = styleConstructor(this.props.theme)
     this.state = {
-      currentMonth,
+      currentDate: props.current ? parseDate(props.current) : XDate(),
       currentDataType: props.dataType,
-    };
+    }
 
-    this.updateMonth = this.updateMonth.bind(this);
-    this.addMonth = this.addMonth.bind(this);
-    this.shouldComponentUpdate = shouldComponentUpdate;
+    this.shouldComponentUpdate = shouldComponentUpdate
   }
 
   componentWillReceiveProps(nextProps) {
-    const current= parseDate(nextProps.current);
-    if (current && current.toString('yyyy MM') !== this.state.currentMonth.toString('yyyy MM')) {
+    const current = parseDate(nextProps.current)
+    if (current && current.toString() !== this.state.currentDate.toString()) {
       this.setState({
-        currentMonth: current.clone()
-      });
+        currentDate: current.clone(),
+      })
     }
   }
 
   updateDataType = (type) => {
     this.setState({
-      currentDataType: type
-    });
+      currentDataType: type,
+    })
   }
 
-  updateMonth(day, doNotTriggerListeners) {
-    if (day.toString('yyyy MM') === this.state.currentMonth.toString('yyyy MM')) {
-      return;
+  updateDate = (date, doNotTriggerListeners) => {
+    console.log(date.toString(), this.state.currentDate.toString())
+    if (date.toString() === this.state.currentDate.toString()) {
+      return
     }
     this.setState({
-      currentMonth: day.clone()
+      currentDate: date.clone(),
     }, () => {
       if (!doNotTriggerListeners) {
-        const currMont = this.state.currentMonth.clone();
+        const currMont = this.state.currentDate.clone()
         if (this.props.onMonthChange) {
-          this.props.onMonthChange(xdateToData(currMont));
+          this.props.onMonthChange(xdateToData(currMont))
         }
         if (this.props.onVisibleMonthsChange) {
-          this.props.onVisibleMonthsChange([xdateToData(currMont)]);
+          this.props.onVisibleMonthsChange([ xdateToData(currMont) ])
         }
       }
-    });
+    })
   }
 
-  addMonth(count) {
-    this.updateMonth(this.state.currentMonth.clone().addMonths(count, true));
+  addDate = (count) => {
+    const {
+      currentDataType,
+      currentDate,
+    } = this.state
+
+    switch (currentDataType) {
+      case CONSTANTS.DATA_TYPES.day:
+        this.updateDate(currentDate.clone().addMonths(count, true))
+        break
+
+      case CONSTANTS.DATA_TYPES.month:
+        this.updateDate(currentDate.clone().addYears(count, true))
+        break
+    }
   }
 
   get renderContent() {
     const {
       currentDataType,
-    } = this.state;
+    } = this.state
 
     const {
-      currentMonth,
-    } = this.state;
+      currentDate,
+    } = this.state
 
     if (currentDataType === CONSTANTS.DATA_TYPES.day) {
       return (
         <Days {...this.props}
-               style={this.style}
-               currentMonth={currentMonth}
-               updateMonth={this.updateMonth}/>
-      );
+              style={this.style}
+              date={currentDate}
+              updateDate={this.updateDate} />
+      )
     }
 
     if (currentDataType === CONSTANTS.DATA_TYPES.month) {
       return (
         <Months {...this.props}
-                 style={this.style}
-                 currentMonth={currentMonth}
-                 updateMonth={this.updateMonth} />
-      );
+                onPress={this.props.onDayPress}
+                style={this.style}
+                date={currentDate}
+                updateDate={this.updateDate} />
+      )
     }
 
-    return <View />;
+    return <View />
   }
 
   render() {
     const {
       allowChangeDataType,
-    } = this.props;
+    } = this.props
 
     const {
       currentDataType,
-    } = this.state;
+    } = this.state
 
-    let indicator;
-    const current = parseDate(this.props.current);
+    let indicator
+    const current = parseDate(this.props.current)
     if (current) {
-      const lastMonthOfDay = current.clone().addMonths(1, true).setDate(1).addDays(-1).toString('yyyy-MM-dd');
+      const lastMonthOfDay = current.clone().addMonths(1, true).setDate(1).addDays(-1).toString('yyyy-MM-dd')
       if (this.props.displayLoadingIndicator &&
           !(this.props.markedDates && this.props.markedDates[lastMonthOfDay])) {
-        indicator = true;
+        indicator = true
       }
     }
 
     return (
-      <View style={[this.style.container, this.props.style]}>
+      <View style={[ this.style.container, this.props.style ]}>
         <CalendarHeader
           theme={this.props.theme}
           hideArrows={this.props.hideArrows}
-          month={this.state.currentMonth}
-          addMonth={this.addMonth}
+          date={this.state.currentDate}
+          addDate={this.addDate}
           showIndicator={indicator}
           firstDay={this.props.firstDay}
           renderArrow={this.props.renderArrow}
@@ -209,9 +216,9 @@ class Calendar extends Component {
           weekNumbers={this.props.showWeekNumbers}
         />
         {this.renderContent}
-
-      </View>);
+      </View>
+    )
   }
 }
 
-export default Calendar;
+export default Calendar

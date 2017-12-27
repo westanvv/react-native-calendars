@@ -14,8 +14,8 @@ import MultiDotDay from './multi-dot';
 
 const EmptyArray = [];
 
-//updateMonth
-//currentMonth
+//updateDate
+//currentDate
 
 class Days extends Component {
 
@@ -25,7 +25,7 @@ class Days extends Component {
 
   pressDay = (date) => {
     const {
-      updateMonth,
+      updateDate,
     } = this.props;
 
     const day = parseDate(date);
@@ -34,7 +34,7 @@ class Days extends Component {
     if (!(minDate && !dateutils.isGTE(day, minDate)) && !(maxDate && !dateutils.isLTE(day, maxDate))) {
       const shouldUpdateMonth = this.props.disableMonthChange === undefined || !this.props.disableMonthChange;
       if (shouldUpdateMonth) {
-        updateMonth(day);
+        updateDate(day);
       }
       if (this.props.onDayPress) {
         this.props.onDayPress(xdateToData(day));
@@ -44,7 +44,7 @@ class Days extends Component {
 
   renderDay(day, id) {
     const {
-      currentMonth,
+      date,
     } = this.props;
 
     const minDate = parseDate(this.props.minDate);
@@ -54,13 +54,13 @@ class Days extends Component {
       state = 'disabled';
     } else if ((minDate && !dateutils.isGTE(day, minDate)) || (maxDate && !dateutils.isLTE(day, maxDate))) {
       state = 'disabled';
-    } else if (!dateutils.sameMonth(day, currentMonth)) {
+    } else if (!dateutils.sameMonth(day, date)) {
       state = 'disabled';
     } else if (dateutils.sameDate(day, XDate())) {
       state = 'today';
     }
     let dayComp;
-    if (!dateutils.sameMonth(day, currentMonth) && this.props.hideExtraDays) {
+    if (!dateutils.sameMonth(day, date) && this.props.hideExtraDays) {
       if (this.props.markingType === 'period') {
         dayComp = (<View key={id} style={{flex: 1}}/>);
       } else {
@@ -113,43 +113,45 @@ class Days extends Component {
   }
 
   renderWeekNumber (weekNumber) {
-    return <Day key={`week-${weekNumber}`} theme={this.props.theme} state='disabled'>{weekNumber}</Day>;
+    return (
+      <Day key={`week-${weekNumber}`} theme={this.props.theme} state='disabled'>{weekNumber}</Day>
+    )
   }
 
   renderWeek(days, id) {
     const {
       style,
-    } = this.props;
+    } = this.props
 
-    let week = [];
+    let week = []
     days.forEach((day, id2) => {
-      week.push(this.renderDay(day, id2));
-    }, this);
+      week.push(this.renderDay(day, id2))
+    }, this)
 
     if (this.props.showWeekNumbers) {
-      week.unshift(this.renderWeekNumber(days[days.length - 1].getWeek()));
+      week.unshift(this.renderWeekNumber(days[days.length - 1].getWeek()))
     }
 
-    return (<View style={style.week} key={id}>{week}</View>);
+    return (
+      <View style={style.week} key={id}>{week}</View>
+    )
   }
 
   render() {
     const {
-      currentMonth,
-    } = this.props;
+      date,
+    } = this.props
 
-    const days = dateutils.page(currentMonth, this.props.firstDay);
-    const weeks = [];
+    const days = dateutils.page(date, this.props.firstDay)
+    const weeks = []
     while (days.length) {
-      weeks.push(this.renderWeek(days.splice(0, 7), weeks.length));
+      weeks.push(this.renderWeek(days.splice(0, 7), weeks.length))
     }
 
     return (
-      <View>
-        {weeks}
-      </View>
-    );
+      <View>{weeks}</View>
+    )
   }
 }
 
-export default Days;
+export default Days

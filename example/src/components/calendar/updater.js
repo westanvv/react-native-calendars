@@ -1,59 +1,60 @@
-import {parseDate} from '../interface';
+import { parseDate } from '../interface'
 
 export default function shouldComponentUpdate(nextProps, nextState) {
   let shouldUpdate = (nextProps.selected || []).reduce((prev, next, i) => {
-    const currentSelected = (this.props.selected || [])[i];
+    const currentSelected = (this.props.selected || [])[i]
     if (!currentSelected || !next || parseDate(currentSelected).getTime() !== parseDate(next).getTime()) {
       return {
         update: true,
-        field: 'selected'
-      };
+        field: 'selected',
+      }
     }
-    return prev;
-  }, {update: false});
+    return prev
+  }, {update: false})
 
   shouldUpdate = ['markedDates', 'hideExtraDays'].reduce((prev, next) => {
     if (!prev.update && nextProps[next] !== this.props[next]) {
       return {
         update: true,
-        field: next
+        field: next,
       };
     }
-    return prev;
-  }, shouldUpdate);
+    return prev
+  }, shouldUpdate)
 
   shouldUpdate = ['minDate', 'maxDate', 'current'].reduce((prev, next) => {
-    const prevDate = parseDate(this.props[next]);
-    const nextDate = parseDate(nextProps[next]);
+    const prevDate = parseDate(this.props[next])
+    const nextDate = parseDate(nextProps[next])
     if (prev.update) {
-      return prev;
+      return prev
     } else if (prevDate !== nextDate) {
       if (prevDate && nextDate && prevDate.getTime() === nextDate.getTime()) {
-        return prev;
+        return prev
       } else {
         return {
           update: true,
-          field: next
-        };
+          field: next,
+        }
       }
     }
-    return prev;
-  }, shouldUpdate);
+    return prev
+  }, shouldUpdate)
 
-  if (nextState.currentMonth !== this.state.currentMonth) {
+  if (nextState.currentDate !== this.state.currentDate) {
     shouldUpdate = {
       update: true,
-      field: 'current'
-    };
+      field: 'current',
+    }
   }
 
   if (nextState.currentDataType !== this.state.currentDataType) {
     shouldUpdate = {
       update: true,
-      field: 'currentDataType'
-    };
+      field: 'currentDataType',
+    }
   }
 
-  // console.log(shouldUpdate.field, shouldUpdate.update);
-  return shouldUpdate.update;
+  // console.log(shouldUpdate.field, shouldUpdate.update)
+
+  return shouldUpdate.update
 }

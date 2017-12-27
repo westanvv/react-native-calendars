@@ -121,7 +121,7 @@ const styles = StyleSheet.create({
     paddingTop: 5,
     borderBottomWidth: 1,
     borderColor: '#eee',
-    height: 350
+    // height: 350
   },
   text: {
     textAlign: 'center',
