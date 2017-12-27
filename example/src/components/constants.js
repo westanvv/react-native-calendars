@@ -1,6 +1,6 @@
 export const DATA_TYPES = {
-  list: [ 'day', 'month', 'year' ],
   day: 'day',
+  week: 'week',
   month: 'month',
   year: 'year',
 }

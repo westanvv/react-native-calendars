@@ -21,7 +21,7 @@ class CalendarHeader extends Component {
     hideDayNames: PropTypes.bool,
     weekNumbers: PropTypes.bool,
     allowChangeDataType: PropTypes.bool,
-    dataType: PropTypes.oneOf(CONSTANTS.DATA_TYPES.list),
+    dataType: PropTypes.oneOf(Object.keys(CONSTANTS.DATA_TYPES)),
     updateDataType: PropTypes.func,
   }
 
@@ -64,6 +64,10 @@ class CalendarHeader extends Component {
     let newDataType = CONSTANTS.DATA_TYPES.day
     switch (dataType) {
       case CONSTANTS.DATA_TYPES.day:
+        newDataType = CONSTANTS.DATA_TYPES.week
+        break
+
+      case CONSTANTS.DATA_TYPES.week:
         newDataType = CONSTANTS.DATA_TYPES.month
         break
     }
@@ -80,6 +84,10 @@ class CalendarHeader extends Component {
     let title = ''
     switch (dataType) {
       case CONSTANTS.DATA_TYPES.day:
+        title = this.props.date.toString(this.props.monthFormat ? this.props.monthFormat : 'MMMM yyyy')
+        break
+
+      case CONSTANTS.DATA_TYPES.week:
         title = this.props.date.toString(this.props.monthFormat ? this.props.monthFormat : 'MMMM yyyy')
         break
 

@@ -144,6 +144,7 @@ class Days extends Component {
 
     const days = dateutils.page(date, this.props.firstDay)
     const weeks = []
+
     while (days.length) {
       weeks.push(this.renderWeek(days.splice(0, 7), weeks.length))
     }

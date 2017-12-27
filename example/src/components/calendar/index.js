@@ -6,12 +6,13 @@ import {
 import PropTypes from 'prop-types'
 
 import XDate from 'xdate'
-import {xdateToData, parseDate} from '../interface'
+import { xdateToData, parseDate } from '../interface'
 import styleConstructor from './style'
 import * as CONSTANTS from '../constants'
 
 import CalendarHeader from './header'
 import Days from './days'
+import Weeks from './weeks'
 import Months from './months'
 
 import shouldComponentUpdate from './updater'
@@ -69,10 +70,12 @@ class Calendar extends Component {
     showWeekNumbers: PropTypes.bool,
 
     allowChangeDataType: PropTypes.bool,
-    dataType: PropTypes.oneOf(CONSTANTS.DATA_TYPES.list),
+    dataType: PropTypes.oneOf(Object.keys(CONSTANTS.DATA_TYPES)),
     // Month format in calendar title. Formatting values: http://arshaw.com/xdate/#Formatting
     monthItemFormat: PropTypes.string,
     monthRowItems: PropTypes.number,
+
+    weekItemFormat: PropTypes.oneOfType([ PropTypes.string, PropTypes.func ]),
   }
 
   static defaultProps = {
@@ -82,6 +85,9 @@ class Calendar extends Component {
     dataType: CONSTANTS.DATA_TYPES.day,
     monthItemFormat: 'MMMM',
     monthRowItems: 3,
+
+    weekItemFormat: item => `${item.date.toString('\'week\' ww')} (${item.startDate.toString('yyyy-MM-dd')} - ${item.endDate.toString('yyyy-MM-dd')})`,
+    // weekItemFormat: '\'week\' ww',
   }
 
   constructor(props) {
@@ -142,6 +148,10 @@ class Calendar extends Component {
         this.updateDate(currentDate.clone().addMonths(count, true))
         break
 
+      case CONSTANTS.DATA_TYPES.week:
+        this.updateDate(currentDate.clone().addMonths(count, true))
+        break
+
       case CONSTANTS.DATA_TYPES.month:
         this.updateDate(currentDate.clone().addYears(count, true))
         break
@@ -163,6 +173,16 @@ class Calendar extends Component {
               style={this.style}
               date={currentDate}
               updateDate={this.updateDate} />
+      )
+    }
+
+    if (currentDataType === CONSTANTS.DATA_TYPES.week) {
+      return (
+        <Weeks {...this.props}
+               onPress={this.props.onDayPress}
+               style={this.style}
+               date={currentDate}
+               updateDate={this.updateDate} />
       )
     }
 

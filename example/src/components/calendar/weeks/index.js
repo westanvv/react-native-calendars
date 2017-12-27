@@ -5,12 +5,11 @@ import {
   View,
 } from 'react-native'
 import PropTypes from 'prop-types'
-import XDate from 'xdate'
 
 import styleConstructor from './style'
 import { parseDate, xdateToData } from '../../interface'
 
-class Months extends Component {
+class Weeks extends Component {
 
   static propTypes = {
     // TODO: disabled props should be removed
@@ -22,7 +21,7 @@ class Months extends Component {
     onPress: PropTypes.func,
     date: PropTypes.object,
 
-    monthRowItems: PropTypes.number,
+    weekItemFormat: PropTypes.oneOfType([ PropTypes.string, PropTypes.func ]),
     updateDate: PropTypes.func,
   }
 
@@ -49,51 +48,77 @@ class Months extends Component {
     return !!changed
   }
 
-  onItemPress = (monthIndex) => {
+  onItemPress = (itemDate) => {
     const {
       updateDate,
       onPress,
-      date,
     } = this.props
 
-    const newDate = parseDate(date)
-    newDate.setMonth(monthIndex)
-
-    updateDate(newDate)
-    onPress(xdateToData(newDate))
+    updateDate(itemDate)
+    onPress(xdateToData(itemDate))
   }
 
-  getDateMarking = (monthIndex) => {
+  getDateMarking = (week) => {
     const {
       markedDates,
-      date,
     } = this.props
 
     let marking = {}
     if (markedDates) {
-      marking = markedDates[parseDate(date).setMonth(monthIndex).toString('yyyy-MM-dd')] || []
-    }
-    if (marking && marking.constructor === Array && marking.length) {
-      marking = {
-        marking: true,
-      }
+      let check = false
+      const startWeekDay = week.startDate.clone()
+      do {
+        marking = markedDates[startWeekDay.toString('yyyy-MM-dd')] || []
+        if (marking && marking.constructor === Array && marking.length) {
+          marking = {
+            marking: true,
+          }
+        }
+        check = Object.keys(marking).length > 0
+        startWeekDay.addDays(1)
+      } while (!check && startWeekDay.getDay() !== 0)
     }
 
     return marking
   }
 
-  renderItem = (monthIndex) => {
+  getWeeks = () => {
     const {
-      monthItemFormat,
+      date,
     } = this.props
 
-    const date = new XDate().setMonth(monthIndex)
-    const itemText = date.toString(monthItemFormat)
+    const month = parseDate(date).setDate(1)
+    const monthNext = month.clone().addMonths(1).setDate(1)
+    const lastWeek = monthNext.getDay() !== 0 ? monthNext.getWeek() : monthNext.getWeek() - 1
+    let weeks = []
+
+    do {
+      const startWeekDay = month.clone()
+      startWeekDay.addDays(-startWeekDay.getDay())
+
+      weeks.push({
+        date: startWeekDay.clone().addDays(1),
+        startDate: startWeekDay.clone(),
+        endDate: startWeekDay.clone().addDays(6),
+        index: month.getWeek(),
+      })
+      month.addWeeks(1)
+    } while (month.getWeek() !== (lastWeek + 1))
+
+    return weeks
+  }
+
+  renderItem = (week) => {
+    const {
+      weekItemFormat,
+    } = this.props
+
+    const itemText = typeof weekItemFormat === 'function' ?  weekItemFormat(week) : week.date.toString(weekItemFormat)
     const containerStyle = [ this.style.base ]
     const textStyle = [ this.style.text ]
     const dotStyle = [ this.style.dot ]
 
-    const marking = this.getDateMarking(monthIndex)
+    const marking = this.getDateMarking(week)
     let dot
     if (marking.marked) {
       dotStyle.push(this.style.visibleDot)
@@ -114,9 +139,9 @@ class Months extends Component {
     }
 
     return (
-      <View style={this.style.month} key={monthIndex}>
+      <View style={this.style.month} key={week.index}>
         <TouchableOpacity style={containerStyle}
-                          onPress={() => this.onItemPress(monthIndex)}
+                          onPress={() => this.onItemPress(week.date)}
                           disabled={
                             typeof marking.disabled !== 'undefined'
                               ? marking.disabled
@@ -130,28 +155,14 @@ class Months extends Component {
   }
 
   render() {
-    const {
-      monthRowItems,
-    } = this.props
-
-    let months = []
-    let monthIndex = 0
-
-    while (monthIndex < 12) {
-      let row = []
-      for (let index = 0; index < monthRowItems; index++) {
-        row.push(this.renderItem(monthIndex))
-        monthIndex++
-      }
-      months.push(
-        <View style={this.style.monthRow} key={months.length}>{row}</View>
-      )
-    }
+    const weeks = this.getWeeks()
 
     return (
-      <View>{months}</View>
+      <View>
+        {weeks && weeks.map(item => this.renderItem(item))}
+      </View>
     )
   }
 }
 
-export default Months
+export default Weeks
