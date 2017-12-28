@@ -2,6 +2,7 @@ import React, { Component } from 'react'
 import {
   View,
   ViewPropTypes,
+  Text,
 } from 'react-native'
 import PropTypes from 'prop-types'
 
@@ -75,10 +76,12 @@ class Calendar extends Component {
     monthItemFormat: PropTypes.string,
     monthRowItems: PropTypes.number,
 
-    weekItemFormat: PropTypes.oneOfType([ PropTypes.string, PropTypes.func ]),
+    renderWeek: PropTypes.func,
+    weekGroupCount: PropTypes.number,
   }
 
   static defaultProps = {
+    firstDay: 0,
     // Show week numbers. Default = false
     showWeekNumbers: true,
     allowChangeDataType: true,
@@ -86,8 +89,8 @@ class Calendar extends Component {
     monthItemFormat: 'MMMM',
     monthRowItems: 3,
 
-    weekItemFormat: item => `${item.date.toString('\'week\' ww')} (${item.startDate.toString('yyyy-MM-dd')} - ${item.endDate.toString('yyyy-MM-dd')})`,
-    // weekItemFormat: '\'week\' ww',
+    renderWeek: (item, style) => <Text style={style}>{`${item.startDate.toString('\'week\' ww')} (${item.startDate.toString('MM/dd')} - ${item.endDate.toString('MM/dd')})`}</Text>,
+    weekGroupCount: 1,
   }
 
   constructor(props) {

@@ -21,8 +21,9 @@ class Weeks extends Component {
     onPress: PropTypes.func,
     date: PropTypes.object,
 
-    weekItemFormat: PropTypes.oneOfType([ PropTypes.string, PropTypes.func ]),
+    renderWeek: PropTypes.func,
     updateDate: PropTypes.func,
+    weekGroupCount: PropTypes.number,
   }
 
   static defaultProps = {
@@ -48,14 +49,14 @@ class Weeks extends Component {
     return !!changed
   }
 
-  onItemPress = (itemDate) => {
+  onItemPress = (week) => {
     const {
       updateDate,
       onPress,
     } = this.props
 
-    updateDate(itemDate)
-    onPress(xdateToData(itemDate))
+    updateDate(week.startDate)
+    onPress(xdateToData(week.startDate))
   }
 
   getDateMarking = (week) => {
@@ -84,36 +85,38 @@ class Weeks extends Component {
 
   getWeeks = () => {
     const {
+      weekGroupCount,
       date,
     } = this.props
 
-    const month = parseDate(date).setDate(1)
-    const monthNext = month.clone().addMonths(1).setDate(1)
-    const lastWeek = monthNext.getDay() !== 0 ? monthNext.getWeek() : monthNext.getWeek() - 1
+    const firstDay = this.props.firstDay || 0
+    const currentMonth = parseDate(date).setDate(1)
+    const currentDay = currentMonth.getDay()
     let weeks = []
 
+    //Moving date to the first day of the week
+    const startWeekDay = currentMonth.clone().addDays(-(currentDay < firstDay ? 7 - firstDay + currentDay : currentDay - firstDay))
+    let endWeekDay
     do {
-      const startWeekDay = month.clone()
-      startWeekDay.addDays(-startWeekDay.getDay())
+      endWeekDay = startWeekDay.clone().addDays(7 * weekGroupCount - 1)
 
-      weeks.push({
-        date: startWeekDay.clone().addDays(1),
+      const dateItem = {
         startDate: startWeekDay.clone(),
-        endDate: startWeekDay.clone().addDays(6),
-        index: month.getWeek(),
-      })
-      month.addWeeks(1)
-    } while (month.getWeek() !== (lastWeek + 1))
+        endDate: endWeekDay.clone(),
+        index: startWeekDay.getWeek(),
+      }
+      weeks.push(dateItem)
+      startWeekDay.addWeeks(1)
+    } while (currentMonth.getMonth() === endWeekDay.getMonth())
 
     return weeks
   }
 
   renderItem = (week) => {
     const {
-      weekItemFormat,
+      renderWeek,
     } = this.props
 
-    const itemText = typeof weekItemFormat === 'function' ?  weekItemFormat(week) : week.date.toString(weekItemFormat)
     const containerStyle = [ this.style.base ]
     const textStyle = [ this.style.text ]
     const dotStyle = [ this.style.dot ]
@@ -141,13 +144,13 @@ class Weeks extends Component {
     return (
       <View style={this.style.month} key={week.index}>
         <TouchableOpacity style={containerStyle}
-                          onPress={() => this.onItemPress(week.date)}
+                          onPress={() => this.onItemPress(week)}
                           disabled={
                             typeof marking.disabled !== 'undefined'
                               ? marking.disabled
                               : this.props.state === 'disabled'
                           } >
-          <Text style={textStyle}>{itemText}</Text>
+          {renderWeek(week, textStyle)}
           {dot}
         </TouchableOpacity>
       </View>
