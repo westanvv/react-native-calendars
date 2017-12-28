@@ -83,8 +83,8 @@ class Calendar extends Component {
   static defaultProps = {
     allowChangeDateType: true,
     dateType: CONSTANTS.DATA_TYPES.day,
-    renderMonthItem: (item, style) => <Text style={style}>{item.toString('MMMM')}</Text>,
-    monthRowItems: 3,
+    renderMonthItem: (item, style) => <Text style={style}>{item.toString('MMM')}</Text>,
+    monthRowItems: 6,
 
     renderWeekItem: (item, style) => <Text style={style}>{`${item.startDate.toString('\'week\' ww')} (${item.startDate.toString('MM/dd')} - ${item.endDate.toString('MM/dd')})`}</Text>,
     weekGroupCount: 1,

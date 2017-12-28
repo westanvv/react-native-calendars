@@ -168,7 +168,7 @@ class Weeks extends Component {
     const weeks = this.getWeeks()
 
     return (
-      <View>
+      <View style={{ flex: 1 }}>
         {weeks && weeks.map(item => this.renderItem(item))}
       </View>
     )

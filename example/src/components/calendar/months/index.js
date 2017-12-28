@@ -157,7 +157,7 @@ class Months extends Component {
     }
 
     return (
-      <View>{months}</View>
+      <View style={{ flex: 1 }}>{months}</View>
     )
   }
 }

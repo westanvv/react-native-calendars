@@ -15,6 +15,7 @@ import CalendarList from '../calendar-list';
 import ReservationsList from './reservation-list';
 import styleConstructor from './style';
 import { VelocityTracker } from '../input';
+import * as CONSTANTS from "../constants";
 
 const HEADER_HEIGHT = 104;
 const KNOB_HEIGHT = 24;
@@ -55,7 +56,7 @@ export default class AgendaView extends Component {
     renderEmptyData: PropTypes.func,
     // specify your item comparison function for increased performance
     rowHasChanged: PropTypes.func,
-    
+
     // Max amount of months allowed to scroll to the past. Default = 50
     pastScrollRange: PropTypes.number,
 
@@ -68,7 +69,7 @@ export default class AgendaView extends Component {
     minDate: PropTypes.any,
     // Maximum date that can be selected, dates after maxDate will be grayed out. Default = undefined
     maxDate: PropTypes.any,
-    
+
     // Collection of dates that have to be marked. Default = items
     markedDates: PropTypes.object,
     // Optional marking type if custom markedDates are provided
@@ -77,8 +78,27 @@ export default class AgendaView extends Component {
     // Hide knob button. Default = false
     hideKnob: PropTypes.bool,
     // Month format in calendar title. Formatting values: http://arshaw.com/xdate/#Formatting
-    monthFormat: PropTypes.string
+    monthFormat: PropTypes.string,
+
+    allowChangeDateType: PropTypes.bool,
+    dateType: PropTypes.oneOf(Object.keys(CONSTANTS.DATA_TYPES)),
+    // Month format in calendar title. Formatting values: http://arshaw.com/xdate/#Formatting
+    renderMonthItem: PropTypes.func,
+    monthRowItems: PropTypes.number,
+
+    renderWeekItem: PropTypes.func,
+    weekGroupCount: PropTypes.number,
   };
+
+  static defaultProps = {
+    allowChangeDateType: true,
+    dateType: CONSTANTS.DATA_TYPES.month,
+    renderMonthItem: (item, style) => <Text style={style}>{item.toString('MMM')}</Text>,
+    monthRowItems: 6,
+
+    renderWeekItem: (item, style) => <Text style={style}>{`${item.startDate.toString('\'week\' ww')} (${item.startDate.toString('MM/dd')} - ${item.endDate.toString('MM/dd')})`}</Text>,
+    weekGroupCount: 1,
+  }
 
   constructor(props) {
     super(props);
@@ -308,6 +328,14 @@ export default class AgendaView extends Component {
     return {...markings, [key]: {...(markings[key] || {}), ...{selected: true}}};
   }
 
+  get renderPlaceholder() {
+    return (
+      <View style={{  }}>
+        <Text style={{  }}>dddddddd</Text>
+      </View>
+    )
+  }
+
   render() {
     const agendaHeight = Math.max(0, this.viewHeight - HEADER_HEIGHT);
     const weekDaysNames = dateutils.weekDayNames(this.props.firstDay);
@@ -338,7 +366,7 @@ export default class AgendaView extends Component {
 
     const headerStyle = [
       this.styles.header,
-      { bottom: agendaHeight, transform: [{ translateY: headerTranslate }] },
+      { bottom: this.props.dateType === CONSTANTS.DATA_TYPES.day ? agendaHeight : 500, transform: [{ translateY: headerTranslate }] },
     ];
 
     if (!this.state.calendarIsReady) {
@@ -370,9 +398,11 @@ export default class AgendaView extends Component {
       );
     }
 
+    // console.log(agendaHeight, contentTranslate, headerStyle)
+
     return (
       <View onLayout={this.onLayout} style={[this.props.style, {flex: 1, overflow: 'hidden'}]}>
-        <View style={this.styles.reservations}>
+        <View style={this.props.dateType === CONSTANTS.DATA_TYPES.day ? this.styles.reservations : this.styles.reservationsCustom}>
           {this.renderReservations()}
         </View>
         <Animated.View style={headerStyle}>
@@ -395,15 +425,23 @@ export default class AgendaView extends Component {
               futureScrollRange={this.props.futureScrollRange}
               dayComponent={this.props.dayComponent}
               disabledByDefault={this.props.disabledByDefault}
+              dateType={this.props.dateType}
             />
           </Animated.View>
           {knob}
         </Animated.View>
-        <Animated.View style={weekdaysStyle}>
-          {weekDaysNames.map((day) => (
-            <Text key={day} style={this.styles.weekday} numberOfLines={1}>{day}</Text>
-          ))}
-        </Animated.View>
+        {this.props.dateType === CONSTANTS.DATA_TYPES.day
+          ? <Animated.View style={weekdaysStyle}>
+              {weekDaysNames.map((day) => (
+                <Text key={day} style={this.styles.weekday} numberOfLines={1}>{day}</Text>
+              ))}
+            </Animated.View>
+          : <Animated.View style={weekdaysStyle}>
+              <View style={{  }}>
+                <Text style={{  }}>dddddddd</Text>
+              </View>
+            </Animated.View>
+        }
         <Animated.ScrollView
           ref={c => this.scrollPad = c}
           overScrollMode='never'
