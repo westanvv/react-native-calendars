@@ -52,11 +52,18 @@ class Weeks extends Component {
   onItemPress = (week) => {
     const {
       updateDate,
+      date,
       onPress,
     } = this.props
 
-    updateDate(week.startDate)
-    onPress(xdateToData(week.startDate))
+    //Fix for auto dateType change
+    let newDate = week.startDate.clone()
+    const currentDate = parseDate(date)
+    if (week.startDate.getMonth() !== currentDate.getMonth()) {
+      newDate = currentDate.setDate(1)
+    }
+    updateDate(newDate)
+    onPress(xdateToData(newDate))
   }
 
   getDateMarking = (week) => {
