@@ -70,26 +70,23 @@ class Calendar extends Component {
     // Show week numbers. Default = false
     showWeekNumbers: PropTypes.bool,
 
-    allowChangeDataType: PropTypes.bool,
-    dataType: PropTypes.oneOf(Object.keys(CONSTANTS.DATA_TYPES)),
+    allowChangeDateType: PropTypes.bool,
+    dateType: PropTypes.oneOf(Object.keys(CONSTANTS.DATA_TYPES)),
     // Month format in calendar title. Formatting values: http://arshaw.com/xdate/#Formatting
-    monthItemFormat: PropTypes.string,
+    renderMonthItem: PropTypes.func,
     monthRowItems: PropTypes.number,
 
-    renderWeek: PropTypes.func,
+    renderWeekItem: PropTypes.func,
     weekGroupCount: PropTypes.number,
   }
 
   static defaultProps = {
-    firstDay: 0,
-    // Show week numbers. Default = false
-    showWeekNumbers: true,
-    allowChangeDataType: true,
-    dataType: CONSTANTS.DATA_TYPES.day,
-    monthItemFormat: 'MMMM',
+    allowChangeDateType: true,
+    dateType: CONSTANTS.DATA_TYPES.day,
+    renderMonthItem: (item, style) => <Text style={style}>{item.toString('MMMM')}</Text>,
     monthRowItems: 3,
 
-    renderWeek: (item, style) => <Text style={style}>{`${item.startDate.toString('\'week\' ww')} (${item.startDate.toString('MM/dd')} - ${item.endDate.toString('MM/dd')})`}</Text>,
+    renderWeekItem: (item, style) => <Text style={style}>{`${item.startDate.toString('\'week\' ww')} (${item.startDate.toString('MM/dd')} - ${item.endDate.toString('MM/dd')})`}</Text>,
     weekGroupCount: 1,
   }
 
@@ -99,7 +96,7 @@ class Calendar extends Component {
     this.style = styleConstructor(this.props.theme)
     this.state = {
       currentDate: props.current ? parseDate(props.current) : XDate(),
-      currentDataType: props.dataType,
+      currentDateType: props.dateType,
     }
 
     this.shouldComponentUpdate = shouldComponentUpdate
@@ -116,7 +113,7 @@ class Calendar extends Component {
 
   updateDataType = (type) => {
     this.setState({
-      currentDataType: type,
+      currentDateType: type,
     })
   }
 
@@ -142,11 +139,11 @@ class Calendar extends Component {
 
   addDate = (count) => {
     const {
-      currentDataType,
+      currentDateType,
       currentDate,
     } = this.state
 
-    switch (currentDataType) {
+    switch (currentDateType) {
       case CONSTANTS.DATA_TYPES.day:
         this.updateDate(currentDate.clone().addMonths(count, true))
         break
@@ -163,14 +160,14 @@ class Calendar extends Component {
 
   get renderContent() {
     const {
-      currentDataType,
+      currentDateType,
     } = this.state
 
     const {
       currentDate,
     } = this.state
 
-    if (currentDataType === CONSTANTS.DATA_TYPES.day) {
+    if (currentDateType === CONSTANTS.DATA_TYPES.day) {
       return (
         <Days {...this.props}
               style={this.style}
@@ -179,7 +176,7 @@ class Calendar extends Component {
       )
     }
 
-    if (currentDataType === CONSTANTS.DATA_TYPES.week) {
+    if (currentDateType === CONSTANTS.DATA_TYPES.week) {
       return (
         <Weeks {...this.props}
                onPress={this.props.onDayPress}
@@ -189,7 +186,7 @@ class Calendar extends Component {
       )
     }
 
-    if (currentDataType === CONSTANTS.DATA_TYPES.month) {
+    if (currentDateType === CONSTANTS.DATA_TYPES.month) {
       return (
         <Months {...this.props}
                 onPress={this.props.onDayPress}
@@ -204,11 +201,11 @@ class Calendar extends Component {
 
   render() {
     const {
-      allowChangeDataType,
+      allowChangeDateType,
     } = this.props
 
     const {
-      currentDataType,
+      currentDateType,
     } = this.state
 
     let indicator
@@ -232,8 +229,8 @@ class Calendar extends Component {
           firstDay={this.props.firstDay}
           renderArrow={this.props.renderArrow}
           monthFormat={this.props.monthFormat}
-          allowChangeDataType={allowChangeDataType}
-          dataType={currentDataType}
+          allowChangeDateType={allowChangeDateType}
+          dateType={currentDateType}
           updateDataType={this.updateDataType}
           hideDayNames={this.props.hideDayNames}
           weekNumbers={this.props.showWeekNumbers}

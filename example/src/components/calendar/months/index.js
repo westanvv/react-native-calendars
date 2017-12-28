@@ -1,11 +1,11 @@
 import React, { Component } from 'react'
 import {
   TouchableOpacity,
-  Text,
   View,
 } from 'react-native'
 import PropTypes from 'prop-types'
 import XDate from 'xdate'
+import dateutils from '../../dateutils'
 
 import styleConstructor from './style'
 import { parseDate, xdateToData } from '../../interface'
@@ -13,15 +13,13 @@ import { parseDate, xdateToData } from '../../interface'
 class Months extends Component {
 
   static propTypes = {
-    // TODO: disabled props should be removed
-    state: PropTypes.oneOf([ 'disabled', 'today', '' ]),
-
     // Specify theme properties to override specific styles for calendar parts. Default = {}
     theme: PropTypes.object,
     markedDates: PropTypes.any,
     onPress: PropTypes.func,
     date: PropTypes.object,
 
+    renderMonthItem: PropTypes.func,
     monthRowItems: PropTypes.number,
     updateDate: PropTypes.func,
   }
@@ -37,7 +35,7 @@ class Months extends Component {
   }
 
   shouldComponentUpdate(nextProps) {
-    const changed = [ 'state', 'children', 'markedDates', 'onPress', 'date' ].reduce((prev, next) => {
+    const changed = [ 'children', 'markedDates', 'onPress', 'date' ].reduce((prev, next) => {
       if (prev) {
         return prev
       } else if (nextProps[next] && this.props[next] && nextProps[next].toString() !== this.props[next].toString()) {
@@ -66,17 +64,14 @@ class Months extends Component {
   getDateMarking = (monthIndex) => {
     const {
       markedDates,
-      date,
     } = this.props
 
     let marking = {}
     if (markedDates) {
-      marking = markedDates[parseDate(date).setMonth(monthIndex).toString('yyyy-MM-dd')] || []
-    }
-    if (marking && marking.constructor === Array && marking.length) {
-      marking = {
-        marking: true,
-      }
+      marking = Object.keys(markedDates).reduce((accumulator, currentValue) => ({
+        ...accumulator,
+        ...(parseDate(currentValue).getMonth() === monthIndex ? markedDates[currentValue] : {}),
+      }), {})
     }
 
     return marking
@@ -84,11 +79,24 @@ class Months extends Component {
 
   renderItem = (monthIndex) => {
     const {
-      monthItemFormat,
+      renderMonthItem,
+      date,
+      disabledByDefault,
     } = this.props
 
-    const date = new XDate().setMonth(monthIndex)
-    const itemText = date.toString(monthItemFormat)
+    const currentDate = parseDate(date).setMonth(monthIndex)
+    const minDate = parseDate(this.props.minDate)
+    const maxDate = parseDate(this.props.maxDate)
+
+    let state = ''
+    if (disabledByDefault) {
+      state = 'disabled'
+    } else if ((minDate && !dateutils.isGTE(currentDate, minDate)) || (maxDate && !dateutils.isLTE(currentDate, maxDate))) {
+      state = 'disabled'
+    } else if (dateutils.sameMonth(XDate(), currentDate)) {
+      state = 'today'
+    }
+
     const containerStyle = [ this.style.base ]
     const textStyle = [ this.style.text ]
     const dotStyle = [ this.style.dot ]
@@ -107,9 +115,9 @@ class Months extends Component {
       containerStyle.push(this.style.selected)
       dotStyle.push(this.style.selectedDot)
       textStyle.push(this.style.selectedText)
-    } else if (typeof marking.disabled !== 'undefined' ? marking.disabled : this.props.state === 'disabled') {
+    } else if (typeof marking.disabled !== 'undefined' ? marking.disabled : state === 'disabled') {
       textStyle.push(this.style.disabledText)
-    } else if (this.props.state === 'today') {
+    } else if (state === 'today') {
       textStyle.push(this.style.todayText)
     }
 
@@ -120,9 +128,9 @@ class Months extends Component {
                           disabled={
                             typeof marking.disabled !== 'undefined'
                               ? marking.disabled
-                              : this.props.state === 'disabled'
+                              : state === 'disabled'
                           } >
-          <Text style={textStyle}>{itemText}</Text>
+          {renderMonthItem(currentDate, textStyle)}
           {dot}
         </TouchableOpacity>
       </View>

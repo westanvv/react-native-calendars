@@ -1,18 +1,18 @@
-import React, {Component} from 'react';
+import React, { Component } from 'react'
 import {
   View,
-} from 'react-native';
-import PropTypes from 'prop-types';
+} from 'react-native'
+import PropTypes from 'prop-types'
 
-import XDate from 'xdate';
-import dateutils from '../../dateutils';
-import {xdateToData, parseDate} from '../../interface';
+import XDate from 'xdate'
+import dateutils from '../../dateutils'
+import { xdateToData, parseDate } from '../../interface'
 
-import Day from './basic';
-import UnitDay from './period';
-import MultiDotDay from './multi-dot';
+import Day from './basic'
+import UnitDay from './period'
+import MultiDotDay from './multi-dot'
 
-const EmptyArray = [];
+const EmptyArray = []
 
 //updateDate
 //currentDate
@@ -20,24 +20,24 @@ const EmptyArray = [];
 class Days extends Component {
 
   constructor(props) {
-    super(props);
+    super(props)
   }
 
   pressDay = (date) => {
     const {
       updateDate,
-    } = this.props;
+    } = this.props
 
-    const day = parseDate(date);
-    const minDate = parseDate(this.props.minDate);
-    const maxDate = parseDate(this.props.maxDate);
+    const day = parseDate(date)
+    const minDate = parseDate(this.props.minDate)
+    const maxDate = parseDate(this.props.maxDate)
     if (!(minDate && !dateutils.isGTE(day, minDate)) && !(maxDate && !dateutils.isLTE(day, maxDate))) {
-      const shouldUpdateMonth = this.props.disableMonthChange === undefined || !this.props.disableMonthChange;
+      const shouldUpdateMonth = this.props.disableMonthChange === undefined || !this.props.disableMonthChange
       if (shouldUpdateMonth) {
-        updateDate(day);
+        updateDate(day)
       }
       if (this.props.onDayPress) {
-        this.props.onDayPress(xdateToData(day));
+        this.props.onDayPress(xdateToData(day))
       }
     }
   }
@@ -45,30 +45,30 @@ class Days extends Component {
   renderDay(day, id) {
     const {
       date,
-    } = this.props;
+    } = this.props
 
-    const minDate = parseDate(this.props.minDate);
-    const maxDate = parseDate(this.props.maxDate);
-    let state = '';
+    const minDate = parseDate(this.props.minDate)
+    const maxDate = parseDate(this.props.maxDate)
+    let state = ''
     if (this.props.disabledByDefault) {
-      state = 'disabled';
+      state = 'disabled'
     } else if ((minDate && !dateutils.isGTE(day, minDate)) || (maxDate && !dateutils.isLTE(day, maxDate))) {
-      state = 'disabled';
+      state = 'disabled'
     } else if (!dateutils.sameMonth(day, date)) {
-      state = 'disabled';
+      state = 'disabled'
     } else if (dateutils.sameDate(day, XDate())) {
-      state = 'today';
+      state = 'today'
     }
-    let dayComp;
+    let dayComp
     if (!dateutils.sameMonth(day, date) && this.props.hideExtraDays) {
       if (this.props.markingType === 'period') {
-        dayComp = (<View key={id} style={{flex: 1}}/>);
+        dayComp = <View key={id} style={{ flex: 1 }}/>
       } else {
-        dayComp = (<View key={id} style={{width: 32}}/>);
+        dayComp = <View key={id} style={{ width: 32 }}/>
       }
     } else {
-      const DayComp = this.getDayComponent();
-      const date = day.getDate();
+      const DayComp = this.getDayComponent()
+      const date = day.getDate()
       dayComp = (
         <DayComp
           key={id}
@@ -80,35 +80,36 @@ class Days extends Component {
         >
           {date}
         </DayComp>
-      );
+      )
     }
-    return dayComp;
+
+    return dayComp
   }
 
   getDayComponent() {
     if (this.props.dayComponent) {
-      return this.props.dayComponent;
+      return this.props.dayComponent
     }
 
     switch (this.props.markingType) {
-    case 'period':
-      return UnitDay;
-    case 'multi-dot':
-      return MultiDotDay;
-    default:
-      return Day;
+      case 'period':
+        return UnitDay
+      case 'multi-dot':
+        return MultiDotDay
+      default:
+        return Day
     }
   }
 
   getDateMarking(day) {
     if (!this.props.markedDates) {
-      return false;
+      return false
     }
-    const dates = this.props.markedDates[day.toString('yyyy-MM-dd')] || EmptyArray;
+    const dates = this.props.markedDates[day.toString('yyyy-MM-dd')] || EmptyArray
     if (dates.length || dates) {
-      return dates;
+      return dates
     } else {
-      return false;
+      return false
     }
   }
 

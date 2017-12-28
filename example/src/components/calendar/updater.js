@@ -47,10 +47,10 @@ export default function shouldComponentUpdate(nextProps, nextState) {
     }
   }
 
-  if (nextState.currentDataType !== this.state.currentDataType) {
+  if (nextState.currentDateType !== this.state.currentDateType) {
     shouldUpdate = {
       update: true,
-      field: 'currentDataType',
+      field: 'currentDateType',
     }
   }
 

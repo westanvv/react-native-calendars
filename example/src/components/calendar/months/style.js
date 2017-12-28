@@ -13,9 +13,8 @@ export default function styleConstructor(theme = {}) {
       justifyContent: 'center',
     },
     month: {
-      height: 30,
-      marginTop: 7,
-      marginBottom: 7,
+      height: 32,
+      marginVertical: 5,
       flex: 1,
       alignItems: 'center',
       justifyContent: 'center',
@@ -51,7 +50,8 @@ export default function styleConstructor(theme = {}) {
     dot: {
       width: 4,
       height: 4,
-      marginTop: 1,
+      marginTop: -3,
+      marginBottom: 4,
       borderRadius: 2,
       opacity: 0,
     },

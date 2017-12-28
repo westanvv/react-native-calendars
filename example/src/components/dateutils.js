@@ -13,6 +13,13 @@ function sameDate(a, b) {
     a.getDate() === b.getDate();
 }
 
+function inWeek(date, startDate, endDate) {
+  if (!(date instanceof XDate) || !(startDate instanceof XDate) || !(endDate instanceof XDate)) {
+    return false
+  }
+  return startDate.diffDays(date) >= 0 && endDate.diffDays(date) <= 0
+}
+
 function isGTE(a, b) {
   return b.diffDays(a) > -1;
 }
@@ -84,6 +91,7 @@ module.exports = {
   weekDayNames,
   sameMonth,
   sameDate,
+  inWeek,
   month,
   page,
   fromTo,

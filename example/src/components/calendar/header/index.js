@@ -20,8 +20,8 @@ class CalendarHeader extends Component {
     renderArrow: PropTypes.func,
     hideDayNames: PropTypes.bool,
     weekNumbers: PropTypes.bool,
-    allowChangeDataType: PropTypes.bool,
-    dataType: PropTypes.oneOf(Object.keys(CONSTANTS.DATA_TYPES)),
+    allowChangeDateType: PropTypes.bool,
+    dateType: PropTypes.oneOf(Object.keys(CONSTANTS.DATA_TYPES)),
     updateDataType: PropTypes.func,
   }
 
@@ -47,7 +47,7 @@ class CalendarHeader extends Component {
     if (
       nextProps.date.toString() !== this.props.date.toString() ||
       nextProps.showIndicator !== this.props.showIndicator ||
-      nextProps.dataType !== this.props.dataType
+      nextProps.dateType !== this.props.dateType
     ) {
       return true
     }
@@ -57,12 +57,12 @@ class CalendarHeader extends Component {
 
   updateDataType = () => {
     const {
-      dataType,
+      dateType,
       updateDataType,
     } = this.props
 
     let newDataType = CONSTANTS.DATA_TYPES.day
-    switch (dataType) {
+    switch (dateType) {
       case CONSTANTS.DATA_TYPES.day:
         newDataType = CONSTANTS.DATA_TYPES.week
         break
@@ -77,12 +77,12 @@ class CalendarHeader extends Component {
 
   get title() {
     const {
-      dataType,
+      dateType,
       showIndicator,
     } = this.props
 
     let title = ''
-    switch (dataType) {
+    switch (dateType) {
       case CONSTANTS.DATA_TYPES.day:
         title = this.props.date.toString(this.props.monthFormat ? this.props.monthFormat : 'MMMM yyyy')
         break
@@ -156,8 +156,8 @@ class CalendarHeader extends Component {
 
   render() {
     const {
-      allowChangeDataType,
-      dataType,
+      allowChangeDateType,
+      dateType,
     } = this.props
 
     let weekDaysNames = weekDayNames(this.props.firstDay)
@@ -167,7 +167,7 @@ class CalendarHeader extends Component {
         <View style={this.style.header}>
           {this.leftArrow}
           {
-            allowChangeDataType
+            allowChangeDateType
               ? <TouchableOpacity onPress={this.updateDataType}
                                   style={this.style.arrow}>
                   {this.title}
@@ -177,7 +177,7 @@ class CalendarHeader extends Component {
           {this.rightArrow}
         </View>
         {
-          dataType === CONSTANTS.DATA_TYPES.day && !this.props.hideDayNames &&
+          dateType === CONSTANTS.DATA_TYPES.day && !this.props.hideDayNames &&
             <View style={this.style.week}>
               {this.props.weekNumbers && <Text style={this.style.dayHeader} />}
               {weekDaysNames.map((day, idx) => (
