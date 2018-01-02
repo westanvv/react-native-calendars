@@ -17,6 +17,8 @@ import styleConstructor from './style';
 import { VelocityTracker } from '../input';
 import * as CONSTANTS from "../constants";
 
+import Headers from './headers'
+
 const HEADER_HEIGHT = 104;
 const KNOB_HEIGHT = 24;
 
@@ -129,7 +131,7 @@ export default class AgendaView extends Component {
   }
 
   calendarOffset() {
-    return 90 - (this.viewHeight / 2);
+    return HEADER_HEIGHT - (this.viewHeight / 2);
   }
 
   initialScrollPadPosition() {
@@ -359,14 +361,14 @@ export default class AgendaView extends Component {
     });
 
     const contentTranslate = this.state.scrollY.interpolate({
-      inputRange: [0, agendaHeight],
-      outputRange: [0, agendaHeight/2],
+      inputRange: [ 0, agendaHeight ],
+      outputRange: [ 0, agendaHeight / 2 ],
       extrapolate: 'clamp',
-    });
+    })
 
     const headerStyle = [
       this.styles.header,
-      { bottom: this.props.dateType === CONSTANTS.DATA_TYPES.day ? agendaHeight : 500, transform: [{ translateY: headerTranslate }] },
+      { bottom: agendaHeight, transform: [{ translateY: headerTranslate }] },
     ];
 
     if (!this.state.calendarIsReady) {
@@ -398,14 +400,14 @@ export default class AgendaView extends Component {
       );
     }
 
-    // console.log(agendaHeight, contentTranslate, headerStyle)
+    // console.log(contentTranslate)
 
     return (
       <View onLayout={this.onLayout} style={[this.props.style, {flex: 1, overflow: 'hidden'}]}>
-        <View style={this.props.dateType === CONSTANTS.DATA_TYPES.day ? this.styles.reservations : this.styles.reservationsCustom}>
+        <View  key={'reservationsContainer'} style={this.props.dateType === CONSTANTS.DATA_TYPES.day ? this.styles.reservations : this.styles.reservationsCustom}>
           {this.renderReservations()}
         </View>
-        <Animated.View style={headerStyle}>
+        <Animated.View key={'calendarListContainer'} style={headerStyle}>
           <Animated.View style={{flex:1, transform: [{ translateY: contentTranslate }]}}>
             <CalendarList
               theme={this.props.theme}
@@ -431,18 +433,17 @@ export default class AgendaView extends Component {
           {knob}
         </Animated.View>
         {this.props.dateType === CONSTANTS.DATA_TYPES.day
-          ? <Animated.View style={weekdaysStyle}>
+          ? <Animated.View key={'headerContainer'} style={weekdaysStyle}>
               {weekDaysNames.map((day) => (
                 <Text key={day} style={this.styles.weekday} numberOfLines={1}>{day}</Text>
               ))}
             </Animated.View>
-          : <Animated.View style={weekdaysStyle}>
-              <View style={{  }}>
-                <Text style={{  }}>dddddddd</Text>
-              </View>
+          : <Animated.View key={'headerContainer'} style={weekdaysStyle}>
+              <Headers.Months />
             </Animated.View>
         }
         <Animated.ScrollView
+          key={'scrollViewContainer'}
           ref={c => this.scrollPad = c}
           overScrollMode='never'
           showsHorizontalScrollIndicator={false}
